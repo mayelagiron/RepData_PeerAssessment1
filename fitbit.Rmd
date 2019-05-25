@@ -1,0 +1,92 @@
+---
+title: "fitbit"
+author: "Mayela Giron"
+date: "17/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r test_data}
+test_data <- read_csv("activity.csv",na=c("NA"),col_types = cols(steps=col_double(),date=col_date(format="%Y-%m-%d"),interval=col_double()))
+```
+
+## Histogram Daily
+```{r}
+daily_step <- aggregate(test_data$steps, by=list(test_data$date),FUN=sum)
+ggplot(daily_step, aes(x=Group.1,y=x))+geom_histogram(stat = "identity")
+
+```
+
+## Histogram mean
+```{r}
+mean_daily_step <- aggregate(test_data$steps, by=list(test_data$date),FUN=mean)
+
+ggplot(mean_daily_step, aes(x=Group.1,y=x))+geom_histogram(stat = "identity")
+
+```
+## Histogram median per day
+```{r}
+median_daily_step <- aggregate(test_data$steps, by=list(test_data$date),FUN=median)
+
+ggplot(median_daily_step, aes(x=Group.1,y=x))+geom_histogram(stat = "identity")
+
+```
+## Mean Value Total per day
+```{r}
+mean(daily_step$x, na.rm = TRUE)
+
+```
+## Median Value Total per day
+```{r}
+median(daily_step$x, na.rm = TRUE)
+
+```
+## Time series plot of the average number of steps taken
+```{r}
+interval_daily_step <- aggregate(test_data$steps, by=list(test_data$interval), FUN=mean, na.rm=TRUE)
+ggplot(interval_daily_step, aes(x=Group.1,y=x))+geom_histogram(stat = "identity")
+```
+## The 5-minute interval that, on average, contains the maximum number of steps
+```{r}
+interval_daily_step[which(interval_daily_step$x== max(interval_daily_step$x)),]
+
+```
+## Code to describe and show a strategy for imputing missing data
+## I will be using "na.rm=TRUE" to my Functions to impute NA values
+```{r}
+
+interval_daily_step <- aggregate(test_data$steps, by=list(test_data$interval), FUN=mean, na.rm=TRUE)
+
+```
+
+##Histogram of the total number of steps taken each day after missing values are imputed
+```{r}
+non_na_daily_step <- aggregate(test_data$steps, by=list(test_data$date),FUN=sum,na.rm=TRUE)
+ggplot(non_na_daily_step, aes(x=Group.1,y=x))+geom_histogram(stat = "identity")
+```
+##Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+```{r}
+
+test_data$weekday <- weekdays(test_data$date)
+test_data$weekend <- ifelse(test_data$weekday=="Saturday" | test_data$weekday=="Sunday", "Weekend", "Weekday" )
+
+interval_daily_step_weekdays <- aggregate(test_data$steps, by=list(test_data$interval,test_data$weekend), FUN=mean, na.rm=TRUE)
+
+ggplot(interval_daily_step_weekdays, aes(x=Group.1, y=x, color=Group.2)) + geom_line(stat = "identity")+
+facet_grid(Group.2 ~.) + xlab("Interval") + ylab("Avg Steps") +
+    ggtitle("Average Number of Steps in Each Interval Comparison Weekend")
+```
+
+
+
+
+Note that the `echo = TRUE` 
